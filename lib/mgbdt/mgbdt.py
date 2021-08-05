@@ -8,6 +8,7 @@ from mgbdt.model import MultiXGBModel
 from mgbdt.utils.log_utils import logger
 
 
+
 class MGBDT:
     def __init__(self, loss=None, target_lr=0.1, epsilon=0.3, verbose=False):
         """

@@ -17,7 +17,7 @@ class MultiXGBModel:
         self.force_no_parallel = force_no_parallel
         self.models = []
         for i in range(self.output_size):
-            single_model = OnlineXGB(max_depth=max_depth, silent=True, n_jobs=-1, learning_rate=learning_rate, **kwargs)
+            single_model = OnlineXGB(max_depth=max_depth, verbosity=0, n_jobs=-1, learning_rate=learning_rate, **kwargs)
             self.models.append(single_model)
 
     def __repr__(self):

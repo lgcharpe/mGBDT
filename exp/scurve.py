@@ -15,7 +15,7 @@ if __name__ == "__main__":
     des_dir = "outputs/scurve"
 
     n_points = 10000
-    X, color = datasets.samples_generator.make_s_curve(n_points, random_state=0)
+    X, color = datasets.make_s_curve(n_points, random_state=0)
     N_HIDDENS = 5
 
     # save input

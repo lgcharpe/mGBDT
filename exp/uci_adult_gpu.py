@@ -11,7 +11,7 @@ from mgbdt.utils.torch_utils import set_gpu_flag, use_gpu
 
 if __name__ == "__main__":
     set_seed(666)
-    print(use_gpu())
+    set_gpu_flag(True)
 
     (x_train, y_train), (x_test, y_test) = uci_adult.load_data()
     logger.info("x_train.shape={}, y_train.shape={}".format(x_train.shape, y_train.shape))
@@ -19,11 +19,11 @@ if __name__ == "__main__":
 
     net = MGBDT(loss=None, target_lr=1.0, epsilon=0.3)
     net.add_layer("tp_layer",
-            F=MultiXGBModel(input_size=113, output_size=128, learning_rate=0.3, max_depth=5, num_boost_round=5),
+            F=MultiXGBModel(input_size=113, output_size=128, learning_rate=0.3, max_depth=5, num_boost_round=5, gpu=True),
             G=None)
     net.add_layer("tp_layer",
-            F=MultiXGBModel(input_size=128, output_size=128, learning_rate=0.3, max_depth=5, num_boost_round=5),
-            G=MultiXGBModel(input_size=128, output_size=128, learning_rate=0.3, max_depth=5, num_boost_round=5))
+            F=MultiXGBModel(input_size=128, output_size=128, learning_rate=0.3, max_depth=5, num_boost_round=5, gpu=True),
+            G=MultiXGBModel(input_size=128, output_size=128, learning_rate=0.3, max_depth=5, num_boost_round=5, gpu=True))
     net.add_layer("bp_layer",
             F=LinearModel(input_size=128, output_size=2, learning_rate=0.03, loss="CrossEntropyLoss"))
     logger.info("[net architecture]")

@@ -37,6 +37,6 @@ class OnlineXGB(XGBModel):
         return self
 
     def predict(self, X):
-        if self._Booster is None:
+        if not hasattr(self, '_Booster'):
             return np.full((X.shape[0],), self.base_score)
         return super(OnlineXGB, self).predict(X)

@@ -5,7 +5,7 @@ from .online_xgb import OnlineXGB
 
 
 class MultiXGBModel:
-    def __init__(self, input_size, output_size, learning_rate, max_depth=5, num_boost_round=1, force_no_parallel=False, **kwargs):
+    def __init__(self, input_size, output_size, learning_rate, max_depth=5, num_boost_round=1, force_no_parallel=False, gpu=False, **kwargs):
         """
         model: (XGBoost)
         """
@@ -16,8 +16,12 @@ class MultiXGBModel:
         self.num_boost_round = num_boost_round
         self.force_no_parallel = force_no_parallel
         self.models = []
+        self.gpu = gpu
         for i in range(self.output_size):
-            single_model = OnlineXGB(max_depth=max_depth, verbosity=0, n_jobs=-1, learning_rate=learning_rate, **kwargs)
+            if self.gpu:
+                single_model = OnlineXGB(max_depth=max_depth, verbosity=0, n_jobs=-1, learning_rate=learning_rate, tree_method='gpu_hist', gpu_id=0, **kwargs)
+            else:
+                single_model = OnlineXGB(max_depth=max_depth, verbosity=0, n_jobs=-1, learning_rate=learning_rate, tree_method='hist', **kwargs)
             self.models.append(single_model)
 
     def __repr__(self):
@@ -29,7 +33,9 @@ class MultiXGBModel:
 
     def fit(self, X, y, num_boost_round=None, params=None):
         assert X.shape[1] == self.input_size
-        if self.force_no_parallel:
+        if self.gpu:
+            self._fit_gpu(X, y, num_boost_round, params)
+        elif self.force_no_parallel:
             self._fit_serial(X, y, num_boost_round, params)
         else:
             self._fit_parallel(X, y, num_boost_round, params)
@@ -44,6 +50,14 @@ class MultiXGBModel:
         return out
 
     def _fit_serial(self, X, y, num_boost_round, params):
+        if num_boost_round is None:
+            num_boost_round = self.num_boost_round
+        for i in range(self.output_size):
+            self.models[i].n_jobs = -1
+        for i in range(self.output_size):
+            self.models[i].fit_increment(X, y[:, i], num_boost_round=num_boost_round, params=None)
+
+    def _fit_gpu(self, X, y, num_boost_round, params):
         if num_boost_round is None:
             num_boost_round = self.num_boost_round
         for i in range(self.output_size):
